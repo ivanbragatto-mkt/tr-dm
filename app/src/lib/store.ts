@@ -34,6 +34,8 @@ export type Automation = {
   pdf: PdfRef | null;
   tag: string;
   requireFollow: boolean;
+  /** Wording of the "please follow us" ask. Empty = defaults in the interface languages. */
+  followGate?: { text: Partial<Record<Lang, string>>; button: Partial<Record<Lang, string>> };
   stats: { runs: number; contacts: number; sent: number; delivered: number; read: number; clicked: number; taps: number; docs: number };
   firings: string[]; // `${contactId}:${postId}` (first comment per person per post)
   modified: number;

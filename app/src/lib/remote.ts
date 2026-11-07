@@ -84,6 +84,7 @@ function fromRow(r: Row): Automation {
     pdf: w?.pdf ?? null,
     tag: w?.tag ?? "",
     requireFollow: w?.requireFollow ?? false,
+    followGate: w?.followGate,
     // numbers will come from the events table once the real engine runs; zero until then
     stats: { runs: 0, contacts: 0, sent: 0, delivered: 0, read: 0, clicked: 0, taps: 0, docs: 0 },
     firings: [],

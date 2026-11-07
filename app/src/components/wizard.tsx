@@ -6,6 +6,7 @@ import { ArrowLeft, FileText, Heart, Trash2 } from "lucide-react";
 import { remoteEnabled } from "@/lib/supabase/client";
 import { uploadPdf } from "@/lib/remote";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
+import { followGateFilled } from "@/lib/flow";
 import { saveAutomation, useStore, type Automation, type Post, type PostScope } from "@/lib/store";
 import { Tester } from "./tester";
 import { Badge, Button, Card, Field, Input, Tabs, Textarea, Toggle, cx } from "./ui";
@@ -72,6 +73,8 @@ export function Wizard({ existing }: { existing?: Automation }) {
   const [pdfErr, setPdfErr] = useState<string | null>(null);
   const [tag, setTag] = useState(existing?.tag ?? "");
   const [follow, setFollow] = useState(existing?.requireFollow ?? false);
+  const [gateText, setGateText] = useState<Partial<Record<Lang, string>>>(existing?.followGate?.text ?? {});
+  const [gateBtn, setGateBtn] = useState<Partial<Record<Lang, string>>>(existing?.followGate?.button ?? {});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [savedId, setSavedId] = useState<string | undefined>(existing?.id);
   const [preview, setPreview] = useState<"post" | "comments" | "dm">("post");
@@ -96,6 +99,7 @@ export function Wizard({ existing }: { existing?: Automation }) {
       pdf,
       tag: tag.trim(),
       requireFollow: follow,
+      followGate: follow ? { text: gateText, button: gateBtn } : undefined,
       status,
     };
   }
@@ -339,6 +343,17 @@ export function Wizard({ existing }: { existing?: Automation }) {
               <Input id="wiz-tag" value={tag} onChange={(e) => setTag(e.target.value)} placeholder={t("wiz.tag.ph")} maxLength={40} />
             </Field>
             <Toggle checked={follow} onChange={setFollow} label={t("wiz.follow")} />
+            {follow && (
+              <div className="space-y-4 rounded-lg bg-surface p-4">
+                <p className="text-xs text-text-muted">{t("wiz.follow.hint")}</p>
+                <Field label={t("wiz.follow.text")} htmlFor="wiz-gate" hint={t("wiz.dm.chars", { n: MAX_DM - (gateText[dmLang] ?? followGateFilled().text[dmLang]).length })}>
+                  <Textarea id="wiz-gate" rows={3} lang={dmLang} maxLength={MAX_DM} value={gateText[dmLang] ?? followGateFilled().text[dmLang]} onChange={(e) => setGateText({ ...gateText, [dmLang]: e.target.value })} />
+                </Field>
+                <Field label={t("wiz.follow.btn")} htmlFor="wiz-gatebtn">
+                  <Input id="wiz-gatebtn" lang={dmLang} maxLength={MAX_BTN} value={gateBtn[dmLang] ?? followGateFilled().button[dmLang]} onChange={(e) => setGateBtn({ ...gateBtn, [dmLang]: e.target.value })} />
+                </Field>
+              </div>
+            )}
           </Card>
         </div>
 

@@ -137,12 +137,20 @@ export function hasButton(d: Extract<NodeData, { kind: "message" }>) {
   return Object.values(d.button).some((v) => (v ?? "").trim());
 }
 
-export const FOLLOW_ASK: Partial<Record<Lang, string>> = {
-  "pt-BR": "Para receber o conteúdo, siga a nossa conta e depois toque no botão abaixo. 💙",
-  "es-AR": "Para recibir el contenido, seguí nuestra cuenta y después tocá el botón de abajo. 💙",
-  en: "To get the content, follow our account and then tap the button below. 💙",
+/** Default "please follow us" message and button, one per interface language. The wizard lets the person edit them. */
+export const FOLLOW_ASK: Record<Lang, string> = {
+  "pt-BR": "Você precisa nos seguir para continuar por aqui. Siga a conta e toque no botão abaixo. 💙",
+  "es-AR": "Necesitás seguirnos para continuar por acá. Seguí la cuenta y tocá el botón de abajo. 💙",
+  en: "You need to follow us to continue here. Follow the account and tap the button below. 💙",
 };
-export const FOLLOW_BTN: Partial<Record<Lang, string>> = { "pt-BR": "Já segui", "es-AR": "Ya la sigo", en: "I followed" };
+export const FOLLOW_BTN: Record<Lang, string> = { "pt-BR": "Já estou seguindo", "es-AR": "Ya estoy siguiendo", en: "I'm following now" };
+export type FollowGate = { text: Partial<Record<Lang, string>>; button: Partial<Record<Lang, string>> };
+const LANG_LIST: Lang[] = ["en", "pt-BR", "es-AR"];
+/** The custom text for each language, or the default where the person left it empty. */
+export function followGateFilled(g?: FollowGate): { text: Record<Lang, string>; button: Record<Lang, string> } {
+  const pick = (c: Partial<Record<Lang, string>> | undefined, d: Record<Lang, string>) => Object.fromEntries(LANG_LIST.map((l) => [l, (c?.[l] ?? "").trim() || d[l]])) as Record<Lang, string>;
+  return { text: pick(g?.text, FOLLOW_ASK), button: pick(g?.button, FOLLOW_BTN) };
+}
 
 /** The graph the quick wizard produces: trigger -> tag -> public reply -> DM -(tap)-> PDF. */
 export function buildGraph(a: {
@@ -157,6 +165,8 @@ export function buildGraph(a: {
   tag: string;
   /** Ask the person to follow the account before the content. Adds a follow check, a "please follow" message and a re-check on tap. */
   requireFollow?: boolean;
+  /** Wording of that ask, per language. Empty = the default. */
+  followGate?: FollowGate;
 }): Graph {
   const nodes: FlowNode[] = [];
   const edges: FlowEdge[] = [];
@@ -186,7 +196,7 @@ export function buildGraph(a: {
   if (gateAt) {
     // not following: ask once, and look again when they tap. The tap leads back to the check, so it repeats until they follow.
     const gid = uid("n");
-    nodes.push({ id: gid, type: "message", position: { x: nodes.find((n) => n.id === dmId)!.position.x, y: 380 }, data: { kind: "message", text: FOLLOW_ASK, button: FOLLOW_BTN, pdf: null } });
+    nodes.push({ id: gid, type: "message", position: { x: nodes.find((n) => n.id === dmId)!.position.x, y: 380 }, data: { kind: "message", ...followGateFilled(a.followGate), pdf: null } });
     edges.push({ id: uid("e"), source: gateAt, sourceHandle: "no", target: gid });
     edges.push({ id: uid("e"), source: gid, sourceHandle: "tap", target: gateAt });
   }
