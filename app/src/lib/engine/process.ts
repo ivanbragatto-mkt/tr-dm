@@ -7,6 +7,7 @@ import { isComment, matchTrigger, type Graph, type TriggerSource } from "../flow
 import type { Lang } from "../i18n";
 import { normalizeEvent, isStartWord, isStopWord, STOP_CONFIRMATION, type Inbound } from "./normalize";
 import { fillVars } from "../vars";
+import { refreshFollow, usesFollowCheck } from "./follow";
 import { runGraph, triggerNode, type Effect, type RunOutput, type Snapshot, type Step } from "./run";
 
 type DB = SupabaseClient;
@@ -135,6 +136,12 @@ export async function processEvent(db: DB, ev: { id: string; external_event_id: 
   }
 
   const snapshot = await loadSnapshot(db, contact, org, now, !isComm);
+  if (usesFollowCheck(graph)) {
+    // first contact: if Meta will not say, treat them as not following (they get the "please follow" message and confirm with a tap)
+    const fr = await refreshFollow(db, acc.id, contact);
+    snapshot.followsAccount = fr.follows ?? false;
+    if (fr.followers != null) snapshot.followers = fr.followers;
+  }
   const rotation = ((await db.from("automation_firings").select("id", { count: "exact", head: true }).eq("automation_id", auto.id)).count ?? 0) + ((await db.from("runs").select("id", { count: "exact", head: true }).eq("automation_id", auto.id)).count ?? 0);
   const out = runGraph({ graph, start: "trigger", snapshot, source, defaultLang: (auto.default_language as Lang) ?? "pt-BR", privateReplyAvailable: isComm, publicRotation: rotation });
 
@@ -206,6 +213,12 @@ async function handleTap(db: DB, acc: Row, org: Row, contact: Row, conv: Row, in
   if (ins.error) return ins.error.code === "23505" ? { status: "ignored", reason: "this button was already used by this person" } : fail(ins.error.message);
 
   const snapshot = await loadSnapshot(db, contact, org, now, true);
+  if (usesFollowCheck(graph)) {
+    // they tapped "I followed": check again. If Meta cannot answer, believe the tap rather than leave them stuck.
+    const fr = await refreshFollow(db, acc.id, contact);
+    snapshot.followsAccount = fr.follows ?? true;
+    if (fr.followers != null) snapshot.followers = fr.followers;
+  }
   const t = triggerNode(graph);
   const out = runGraph({ graph, start: { nodeId, handle: "tap" }, snapshot, source: t?.t.source ?? "ig_comment", defaultLang: (auto.default_language as Lang) ?? "pt-BR", privateReplyAvailable: false, publicRotation: 0 });
   const run = must(await db.from("runs").insert({ org_id: acc.org_id, automation_id: auto.id, version_id: auto.live_version_id, contact_id: contact.id, status: "running" }).select("id").single(), "run") as Row;

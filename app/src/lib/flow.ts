@@ -137,6 +137,13 @@ export function hasButton(d: Extract<NodeData, { kind: "message" }>) {
   return Object.values(d.button).some((v) => (v ?? "").trim());
 }
 
+export const FOLLOW_ASK: Partial<Record<Lang, string>> = {
+  "pt-BR": "Para receber o conteúdo, siga a nossa conta e depois toque no botão abaixo. 💙",
+  "es-AR": "Para recibir el contenido, seguí nuestra cuenta y después tocá el botón de abajo. 💙",
+  en: "To get the content, follow our account and then tap the button below. 💙",
+};
+export const FOLLOW_BTN: Partial<Record<Lang, string>> = { "pt-BR": "Já segui", "es-AR": "Ya la sigo", en: "I followed" };
+
 /** The graph the quick wizard produces: trigger -> tag -> public reply -> DM -(tap)-> PDF. */
 export function buildGraph(a: {
   postScope: PostScope;
@@ -148,6 +155,8 @@ export function buildGraph(a: {
   dm: { text: Partial<Record<Lang, string>>; button: Partial<Record<Lang, string>> };
   pdf: PdfRef | null;
   tag: string;
+  /** Ask the person to follow the account before the content. Adds a follow check, a "please follow" message and a re-check on tap. */
+  requireFollow?: boolean;
 }): Graph {
   const nodes: FlowNode[] = [];
   const edges: FlowEdge[] = [];
@@ -164,10 +173,22 @@ export function buildGraph(a: {
   add({ kind: "trigger", source: "ig_comment", postScope: a.postScope, postId: a.postId, anyWord: a.anyWord, keywords: a.keywords });
   if (a.tag) add({ kind: "actions", items: [{ type: "addTag", value: a.tag }] });
   if (a.publicReply && a.publicReplies.length) add({ kind: "public", replies: a.publicReplies });
+  let gateAt: string | null = null;
+  if (a.requireFollow) {
+    gateAt = add({ kind: "condition", mode: "all", rows: [{ field: "follows", op: "is", value: "true" }] });
+    prev = { id: gateAt, handle: "yes" };
+  }
   const dmId = add({ kind: "message", text: a.dm.text, button: a.dm.button, pdf: null });
   if (a.pdf) {
     prev = { id: dmId, handle: "tap" };
     add({ kind: "message", text: {}, button: {}, pdf: a.pdf });
+  }
+  if (gateAt) {
+    // not following: ask once, and look again when they tap. The tap leads back to the check, so it repeats until they follow.
+    const gid = uid("n");
+    nodes.push({ id: gid, type: "message", position: { x: nodes.find((n) => n.id === dmId)!.position.x, y: 380 }, data: { kind: "message", text: FOLLOW_ASK, button: FOLLOW_BTN, pdf: null } });
+    edges.push({ id: uid("e"), source: gateAt, sourceHandle: "no", target: gid });
+    edges.push({ id: uid("e"), source: gid, sourceHandle: "tap", target: gateAt });
   }
   return { nodes, edges };
 }
@@ -202,7 +223,8 @@ export function validateGraph(g: Graph, defaultLang: Lang, opts: { requireUpload
   let cyc = false;
   const dfs = (id: string) => {
     color.set(id, 1);
-    for (const e of outs(id)) {
+    // a loop that goes through a button tap needs the person to tap again each time, so it cannot send forever
+    for (const e of outs(id).filter((x) => x.sourceHandle !== "tap")) {
       const c = color.get(e.target);
       if (c === 1) cyc = true;
       else if (!c) dfs(e.target);

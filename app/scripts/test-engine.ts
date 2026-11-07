@@ -48,6 +48,25 @@ const es = runGraph({ ...base, start: "trigger", snapshot: snap({ language: "es-
 const em = es.effects.find((e) => e.type === "message");
 ck("language falls back to the default", !!em && em.type === "message" && em.text === "Olá!");
 
+// "ask them to follow first": not following -> only the gate message; tap while still not following -> gate again; tap after following -> the content
+import { validateGraph } from "../src/lib/flow";
+const fg = buildGraph({ postScope: "all", postId: null, anyWord: true, keywords: [], publicReply: false, publicReplies: [], dm: { text: { "pt-BR": "Aqui está!" }, button: { "pt-BR": "Quero" } }, pdf: { name: "g.pdf", size: 10 }, tag: "", requireFollow: true });
+const fbase = { graph: fg, defaultLang: "pt-BR" as const, publicRotation: 0, source: "ig_comment" as const };
+const msgs = (o: ReturnType<typeof runGraph>) => o.effects.filter((e): e is Extract<typeof e, { type: "message" }> => e.type === "message");
+const f1 = runGraph({ ...fbase, start: "trigger", snapshot: snap({ followsAccount: false }), privateReplyAvailable: true });
+ck("follow gate: not following gets only the ask, as the private reply", msgs(f1).length === 1 && msgs(f1)[0].mode === "private_reply" && /siga/i.test(msgs(f1)[0].text) && msgs(f1)[0].button === "Já segui", JSON.stringify(f1.effects));
+const gate = fg.nodes.find((n) => n.data.kind === "message" && /siga/i.test(n.data.text["pt-BR"] ?? ""))!;
+const f2 = runGraph({ ...fbase, start: { nodeId: gate.id, handle: "tap" }, snapshot: snap({ followsAccount: false, windowOpen: true }), privateReplyAvailable: false });
+ck("follow gate: tapped but still not following -> asked again", msgs(f2).length === 1 && /siga/i.test(msgs(f2)[0].text));
+const f3 = runGraph({ ...fbase, start: { nodeId: gate.id, handle: "tap" }, snapshot: snap({ followsAccount: true, windowOpen: true }), privateReplyAvailable: false });
+ck("follow gate: tapped after following -> the content", msgs(f3).length === 1 && msgs(f3)[0].text === "Aqui está!" && msgs(f3)[0].button === "Quero");
+const f4 = runGraph({ ...fbase, start: "trigger", snapshot: snap({ followsAccount: true }), privateReplyAvailable: true });
+ck("follow gate: already following -> the content right away", msgs(f4).length === 1 && msgs(f4)[0].text === "Aqui está!" && msgs(f4)[0].mode === "private_reply");
+const issues = validateGraph(fg, "pt-BR", { requireUpload: false });
+ck("follow gate: the graph passes validation (the tap loop is allowed)", !issues.some((i) => i.key === "ed.i.cycle" || i.key === "ed.i.window" || i.key === "ed.i.unreachable"), JSON.stringify(issues));
+const noGate = buildGraph({ postScope: "all", postId: null, anyWord: true, keywords: [], publicReply: false, publicReplies: [], dm: { text: { "pt-BR": "x" }, button: {} }, pdf: null, tag: "" });
+ck("without the option there is no follow check", !noGate.nodes.some((n) => n.data.kind === "condition"));
+
 // condition + randomizer + wait + loop guard
 const mk = (nodes: Graph["nodes"], edges: Graph["edges"]): Graph => ({ nodes, edges });
 const N = (id: string, data: Graph["nodes"][number]["data"]) => ({ id, type: data.kind, position: { x: 0, y: 0 }, data });
