@@ -6,9 +6,9 @@ import { ArrowLeft, FileText, Heart, Trash2 } from "lucide-react";
 import { remoteEnabled } from "@/lib/supabase/client";
 import { uploadPdf } from "@/lib/remote";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
-import { followGateFilled } from "@/lib/flow";
 import { saveAutomation, useStore, type Automation, type Post, type PostScope } from "@/lib/store";
-import { Tester } from "./tester";
+import { WizardTest } from "./wizard-test";
+import { buildGraph, followGateFilled } from "@/lib/flow";
 import { Badge, Button, Card, Field, Input, Tabs, Textarea, Toggle, cx } from "./ui";
 
 const MAX_DM = 1000;
@@ -368,7 +368,7 @@ export function Wizard({ existing }: { existing?: Automation }) {
             btn={curBtn}
             pdf={pdf?.name}
           />
-          <Tester savedId={savedId} keyword={anyWord ? "info" : words[0] ?? "info"} defaultLang={defaultLang} />
+          <WizardTest graph={buildGraph(buildInput())} defaultLang={defaultLang} />
         </aside>
       </div>
     </div>
