@@ -6,7 +6,7 @@ const contact = process.env.NEXT_PUBLIC_PRIVACY_CONTACT;
 
 const Block = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="space-y-2">
-    <h2 className="text-lg font-semibold">{title}</h2>
+    <h2 className="text-xl font-medium text-accent">{title}</h2>
     {children}
   </section>
 );

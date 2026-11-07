@@ -1,13 +1,12 @@
 "use client";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { cx } from "./ui";
 
-export type Line = { label: string; color: string; values: (number | null)[] };
+export type Line = { label: string; color: string; values: (number | null)[]; dash?: boolean };
 
-const W = 640;
 const H = 220;
 const PAD = { l: 44, r: 12, t: 12, b: 26 };
-const nf = (n: number, lang = "en") => new Intl.NumberFormat(lang, { notation: Math.abs(n) >= 10000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(n);
+const nf = (n: number, lang = "en") => new Intl.NumberFormat(lang, { notation: Math.abs(n) >= 100000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(n);
 
 function niceMax(v: number) {
   if (v <= 5) return 5;
@@ -19,7 +18,20 @@ function niceMax(v: number) {
 /** A small dependency-free line chart. Hover or focus a point to read the values of that day. */
 export function LineChart({ days, lines, lang = "en", empty, ariaLabel }: { days: string[]; lines: Line[]; lang?: string; empty: string; ariaLabel: string }) {
   const [hover, setHover] = useState<number | null>(null);
+  const [W, setW] = useState(640);
+  const box = useRef<HTMLDivElement>(null);
   const id = useId();
+  const hasData = lines.some((l) => l.values.some((v) => v != null));
+  // draw at the real width so text keeps its size and the height stays fixed
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const fit = () => setW(Math.max(280, Math.round(el.getBoundingClientRect().width)));
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasData]);
   const all = lines.flatMap((l) => l.values).filter((v): v is number => v != null);
   if (all.length === 0) return <p className="grid h-40 place-items-center rounded-lg bg-surface px-4 text-center text-sm text-text-muted">{empty}</p>;
   const hi = Math.max(...all);
@@ -50,17 +62,17 @@ export function LineChart({ days, lines, lang = "en", empty, ariaLabel }: { days
   };
   const cur = hover ?? days.length - 1;
   return (
-    <div>
+    <div ref={box}>
       <div className="mb-2 flex min-h-6 flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-        <span className="font-medium text-text-muted">{fmtDay(days[cur])}</span>
+        <span className="font-medium text-accent">{fmtDay(days[cur])}</span>
         {lines.map((l) => (
           <span key={l.label} className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-4 rounded-pill" style={{ background: l.color }} aria-hidden />
+            <span className="h-0.5 w-4 rounded-pill" style={{ background: l.dash ? `repeating-linear-gradient(90deg, ${l.color} 0 2px, transparent 2px 5px)` : l.color, height: 3 }} aria-hidden />
             {l.label}: <strong>{l.values[cur] == null ? "–" : nf(l.values[cur]!, lang)}</strong>
           </span>
         ))}
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="h-auto w-full touch-none" onPointerMove={move} onPointerLeave={() => setHover(null)}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block touch-none" onPointerMove={move} onPointerLeave={() => setHover(null)}>
         <title id={id}>{ariaLabel}</title>
         {ticks.map((t) => (
           <g key={t}>
@@ -78,7 +90,7 @@ export function LineChart({ days, lines, lang = "en", empty, ariaLabel }: { days
         {hover != null && <line x1={x(hover)} x2={x(hover)} y1={PAD.t} y2={H - PAD.b} stroke="var(--color-border-input)" strokeDasharray="3 3" />}
         {lines.map((l) => (
           <g key={l.label}>
-            <path d={path(l.values)} fill="none" stroke={l.color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+            <path d={path(l.values)} fill="none" stroke={l.color} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" strokeDasharray={l.dash ? "2 7" : undefined} />
             {l.values[cur] != null && <circle cx={x(cur)} cy={y(l.values[cur]!)} r="4" fill={l.color} stroke="var(--color-bg)" strokeWidth="2" />}
           </g>
         ))}
@@ -90,10 +102,10 @@ export function LineChart({ days, lines, lang = "en", empty, ariaLabel }: { days
 /** A number with how much it moved over the period. */
 export function Stat({ label, value, delta, hint, className }: { label: string; value: string; delta?: number | null; hint?: string; className?: string }) {
   return (
-    <div className={cx("rounded-xl bg-surface-raised p-4", className)}>
-      <div className="text-xs font-medium text-text-muted">{label}</div>
-      <div className="mt-1 text-display font-medium leading-none text-accent">{value}</div>
-      <div className="mt-2 min-h-4 text-xs text-text-muted">
+    <div className={cx("rounded-lg bg-surface-raised px-6 py-5", className)}>
+      <div className="text-sm">{label}</div>
+      <div className="mt-1.5 text-[40px] font-light leading-none text-accent">{value}</div>
+      <div className="mt-2 min-h-4 text-[13px]">
         {delta != null && delta !== 0 && <span className={cx("font-medium", delta > 0 ? "text-success" : "text-danger")}>{delta > 0 ? "+" : ""}{nf(delta)} </span>}
         {hint}
       </div>
@@ -101,7 +113,25 @@ export function Stat({ label, value, delta, hint, className }: { label: string; 
   );
 }
 
-export const CHART_COLORS = { orange: "var(--color-signature)", navy: "var(--color-accent)", green: "var(--color-success)" };
+export const CHART_COLORS = { orange: "var(--color-signature)", navy: "var(--color-accent)", navyDash: "var(--color-accent)" };
 export const lastNum = (v: (number | null)[]) => [...v].reverse().find((x) => x != null) ?? null;
 export const firstNum = (v: (number | null)[]) => v.find((x) => x != null) ?? null;
 export const sumNum = (v: (number | null)[]) => v.reduce<number>((s, x) => s + (x ?? 0), 0);
+
+/** A quiet area line with a dot on the last value, for the big number card. No axes. */
+export function Spark({ values, stroke = "var(--color-signature)", fill = "#ffffff", className }: { values: (number | null)[]; stroke?: string; fill?: string; className?: string }) {
+  const v = values.map((x) => x ?? 0);
+  const max = Math.max(1, ...v);
+  const n = Math.max(2, v.length);
+  const pts = v.map((x, i) => [(i / (n - 1)) * 400, 82 - (x / max) * 70] as const);
+  if (pts.length < 2) pts.push([400, 82]);
+  const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
+  return (
+    <svg aria-hidden viewBox="0 0 400 90" preserveAspectRatio="none" className={className}>
+      <path d={`${d} L400,90 L0,90 Z`} fill={fill} fillOpacity=".08" />
+      <path d={d} fill="none" stroke={stroke} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <circle cx={last[0]} cy={last[1]} r="5" fill={stroke} />
+    </svg>
+  );
+}

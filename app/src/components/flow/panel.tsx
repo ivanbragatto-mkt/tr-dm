@@ -9,7 +9,7 @@ import { uploadPdf } from "@/lib/remote";
 import { Button, Field, Input, Tabs, Textarea, cx } from "../ui";
 import { KIND_META, nodeTitle } from "./nodes";
 
-const sel = "h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm";
+const sel = "h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm";
 const FIELDS: FField[] = ["tag", "language", "follows", "optin", "followers", "windowOpen", "hour"];
 const ACTIONS: ActionType[] = ["addTag", "removeTag", "pause", "assign", "unsubscribe", "notify"];
 const fKey = (f: FField) => `ed.f.${f === "windowOpen" ? "window" : f}` as Key;
@@ -353,7 +353,7 @@ function ConditionEditor({ d, update }: { d: Extract<NodeData, { kind: "conditio
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span>{t("ed.cond.matches")}</span>
-        <select aria-label={t("ed.cond.matches")} value={d.mode} onChange={(e) => update({ ...d, mode: e.target.value as "all" | "any" })} className="h-9 rounded-md border border-border-input bg-bg px-2 text-sm font-semibold text-accent">
+        <select aria-label={t("ed.cond.matches")} value={d.mode} onChange={(e) => update({ ...d, mode: e.target.value as "all" | "any" })} className="h-9 rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm font-semibold text-accent">
           <option value="all">{t("ed.cond.all")}</option>
           <option value="any">{t("ed.cond.any")}</option>
         </select>

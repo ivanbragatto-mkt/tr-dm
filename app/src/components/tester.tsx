@@ -45,7 +45,7 @@ export function Tester({ savedId, keyword, defaultLang, advanced, trigger }: { s
       )}
       {advanced && comment_ && (
         <Field label={t("ed.t.post")} htmlFor="t-post">
-          <select id="t-post" value={postId} onChange={(e) => setPostId(e.target.value)} className="h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm">
+          <select id="t-post" value={postId} onChange={(e) => setPostId(e.target.value)} className="h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm">
             <option value="">—</option>
             {shown.map((p) => (
               <option key={p.id} value={p.id}>
@@ -61,7 +61,7 @@ export function Tester({ savedId, keyword, defaultLang, advanced, trigger }: { s
         </Field>
       )}
       <Field label={t("wiz.lang")} htmlFor="t-lang">
-        <select id="t-lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm">
+        <select id="t-lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm">
           {LANGS.map((l) => (
             <option key={l.code} value={l.code}>
               {l.label}
@@ -80,7 +80,7 @@ export function Tester({ savedId, keyword, defaultLang, advanced, trigger }: { s
           </Field>
           {comment_ && (
           <Field label={t("ed.t.optin")} htmlFor="t-optin">
-            <select id="t-optin" value={optin} onChange={(e) => setOptin(e.target.value as "comment" | "ad")} className="h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm">
+            <select id="t-optin" value={optin} onChange={(e) => setOptin(e.target.value as "comment" | "ad")} className="h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm">
               <option value="comment">{t("ed.v.comment")}</option>
               <option value="ad">{t("ed.v.ad")}</option>
             </select>

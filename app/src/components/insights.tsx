@@ -56,12 +56,12 @@ export function Charts({ data, days }: { data: InsightsData; days: number }) {
         {showReach ? <Stat label={t("ins.interactions")} value={nf(sumNum(s.interactions), lang)} hint={period} /> : <Stat label={t("ins.contacts")} value={nf(sumNum(s.new_contacts), lang)} hint={period} />}
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="p-4">
-          <h3 className="mb-3 text-sm font-medium">{t("ins.growth")}</h3>
+        <Card className="p-6 sm:px-8 sm:py-7">
+          <h3 className="mb-4 text-lg font-medium text-accent">{t("ins.growth")}</h3>
           <LineChart days={data.days} lang={lang} empty={t("ins.empty")} ariaLabel={t("ins.growth")} lines={[{ label: t("ins.followers"), color: CHART_COLORS.orange, values: s.followers }]} />
         </Card>
-        <Card className="p-4">
-          <h3 className="mb-3 text-sm font-medium">{t("ins.activity")}</h3>
+        <Card className="p-6 sm:px-8 sm:py-7">
+          <h3 className="mb-4 text-lg font-medium text-accent">{t("ins.activity")}</h3>
           <LineChart
             days={data.days}
             lang={lang}
@@ -70,13 +70,13 @@ export function Charts({ data, days }: { data: InsightsData; days: number }) {
             lines={[
               { label: t("ins.triggers"), color: CHART_COLORS.orange, values: s.triggers },
               { label: t("ins.out"), color: CHART_COLORS.navy, values: s.messages_out },
-              { label: t("ins.contacts"), color: CHART_COLORS.green, values: s.new_contacts },
+              { label: t("ins.contacts"), color: CHART_COLORS.navyDash, values: s.new_contacts, dash: true },
             ]}
           />
         </Card>
         {showReach && (
-          <Card className="p-4 lg:col-span-2">
-            <h3 className="mb-3 text-sm font-medium">{t("ins.reachint")}</h3>
+          <Card className="p-6 sm:px-8 sm:py-7 lg:col-span-2">
+            <h3 className="mb-4 text-lg font-medium text-accent">{t("ins.reachint")}</h3>
             <LineChart
               days={data.days}
               lang={lang}
@@ -90,7 +90,7 @@ export function Charts({ data, days }: { data: InsightsData; days: number }) {
           </Card>
         )}
       </div>
-      <p className="text-xs text-text-muted">{showReach ? t("ins.since") : `${t("ins.noperm")} ${t("ins.since")}`}</p>
+      <p className="text-sm">{showReach ? t("ins.since") : `${t("ins.noperm")} ${t("ins.since")}`}</p>
     </div>
   );
 }

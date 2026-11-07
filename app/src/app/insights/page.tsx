@@ -23,9 +23,9 @@ export default function InsightsPage() {
   const one: InsightsData | null = data && data.accounts[0] ? { ...data, total: data.accounts[0].series, insightsKnown: data.accounts[0].insightsKnown } : null;
   const tone = { live: "success", paused: "warning", draft: "muted" } as const;
   const range = (
-    <div role="group" aria-label={t("ins.range")} className="inline-flex rounded-pill bg-surface-raised p-1">
+    <div role="group" aria-label={t("ins.range")} className="inline-flex rounded-pill bg-surface-raised p-1.5">
       {RANGES.map((n) => (
-        <button key={n} type="button" aria-pressed={days === n} onClick={() => setDays(n)} className={`h-9 rounded-pill px-4 text-sm font-medium ${days === n ? "bg-accent text-on-accent" : "text-accent hover:bg-accent-soft"}`}>
+        <button key={n} type="button" aria-pressed={days === n} onClick={() => setDays(n)} className={`h-10 rounded-pill px-5 text-[15px] font-medium ${days === n ? "bg-accent text-on-accent" : "text-accent hover:bg-accent-soft"}`}>
           {t("ins.days", { n })}
         </button>
       ))}
@@ -33,11 +33,11 @@ export default function InsightsPage() {
   );
   return (
     <div className="mx-auto max-w-content pb-12">
-      <PageHeader title={acc ? `${t("ins.title")} · @${acc.username.replace(/^@/, "")}` : t("ins.title")} actions={range} />
+      <PageHeader title={t("ins.title")} eyebrow={acc ? `@${acc.username.replace(/^@/, "")}` : null} actions={range} />
       <div className="space-y-6 px-4 sm:px-8">
         {mine.length > 0 && (
           <div className="max-w-xs">
-            <div className="mb-1 text-xs font-medium text-text-muted">{t("ins.account")}</div>
+            <div className="mb-1.5 text-sm font-medium text-accent">{t("ins.account")}</div>
             <AccountPicker accounts={mine} portfolios={portfolios} value={acc?.id ?? null} onChange={setSel} label={t("ins.account")} />
           </div>
         )}
@@ -48,33 +48,33 @@ export default function InsightsPage() {
 
         {data?.automations && (
           <section aria-labelledby="au">
-            <h2 id="au" className="mb-3 text-lg font-semibold">{t("ins.autos")}</h2>
+            <h2 id="au" className="mb-3 text-xl font-medium text-accent">{t("ins.autos")}</h2>
             <Card className="overflow-x-auto">
               {data.automations.length === 0 ? (
                 <p className="p-4 text-sm text-text-muted">{t("ins.autos.none")}</p>
               ) : (
                 <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead className="border-b border-border text-xs text-text-muted">
+                  <thead className="border-b border-border text-sm">
                     <tr>
                       {(["auto.col.name", "ins.autos.col.runs", "ins.autos.col.people", "ins.autos.col.sent", "ins.autos.col.taps", "ins.autos.col.docs"] as const).map((k) => (
-                        <th key={k} scope="col" className="px-4 py-3 font-medium">{t(k)}</th>
+                        <th key={k} scope="col" className="px-6 py-4 font-medium text-accent">{t(k)}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {data.automations.map((a) => (
                       <tr key={a.id} className="border-b border-border last:border-0">
-                        <td className="px-4 py-3">
+                        <td className="px-6 py-4">
                           <span className="flex items-center gap-3 font-semibold">
                             <Badge tone={tone[a.status as keyof typeof tone] ?? "muted"}>{t(`auto.status.${a.status}` as "auto.status.live")}</Badge>
                             <span className="break-words">{a.name}</span>
                           </span>
                         </td>
-                        <td className="px-4 py-3">{a.runs}</td>
-                        <td className="px-4 py-3">{a.contacts}</td>
-                        <td className="px-4 py-3">{a.sent}</td>
-                        <td className="px-4 py-3">{a.taps}</td>
-                        <td className="px-4 py-3">{a.docs}</td>
+                        <td className="px-6 py-4">{a.runs}</td>
+                        <td className="px-6 py-4">{a.contacts}</td>
+                        <td className="px-6 py-4">{a.sent}</td>
+                        <td className="px-6 py-4">{a.taps}</td>
+                        <td className="px-6 py-4">{a.docs}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -86,7 +86,7 @@ export default function InsightsPage() {
 
         {data?.topPosts && data.topPosts.length > 0 && (
           <section aria-labelledby="tp">
-            <h2 id="tp" className="text-lg font-semibold">{t("ins.posts")}</h2>
+            <h2 id="tp" className="text-xl font-medium text-accent">{t("ins.posts")}</h2>
             <p className="mb-3 text-sm text-text-muted">{t("ins.posts.sub")}</p>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {data.topPosts.map((p) => (

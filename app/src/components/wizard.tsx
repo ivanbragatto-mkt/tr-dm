@@ -7,6 +7,7 @@ import { remoteEnabled } from "@/lib/supabase/client";
 import { uploadPdf } from "@/lib/remote";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import { saveAutomation, useStore, type Automation, type Post, type PostScope } from "@/lib/store";
+import { PageHeader } from "./shell";
 import { WizardTest } from "./wizard-test";
 import { buildGraph, followGateFilled } from "@/lib/flow";
 import { Badge, Button, Card, Field, Input, Tabs, Textarea, Toggle, cx } from "./ui";
@@ -147,20 +148,39 @@ export function Wizard({ existing }: { existing?: Automation }) {
   }));
 
   return (
-    <div className="mx-auto max-w-content px-4 pb-16 pt-6 sm:px-8">
-      <Link href="/automations" className="mb-3 inline-flex items-center gap-1 text-sm text-text-muted hover:text-text">
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        {t("flow.back")}
-      </Link>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold">{t("wiz.title")}</h1>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => save()}>
-            {t("wiz.save")}
-          </Button>
-          <Button onClick={() => save("live")}>{t("wiz.activate")}</Button>
-        </div>
+    <div className="mx-auto max-w-content pb-16">
+      <div className="px-4 pt-6 sm:px-8">
+        <Link href="/automations" className="inline-flex items-center gap-1.5 text-[15px] text-accent hover:text-signature">
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          {t("flow.back")}
+        </Link>
       </div>
+      <PageHeader
+        eyebrow={null}
+        title={t("wiz.title")}
+        actions={
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={() => save()}>
+              {t("wiz.save")}
+            </Button>
+            <Button onClick={() => save("live")}>{t("wiz.activate")}</Button>
+          </div>
+        }
+      />
+      <div className="px-4 sm:px-8">
+      <ol aria-label={t("wiz.steps")} className="mb-6 flex flex-wrap items-center gap-x-3.5 gap-y-3 rounded-lg bg-surface-raised px-7 py-5">
+        {[t("wiz.step.post"), t("wiz.step.words"), t("wiz.step.dm")].map((label, i) => (
+          <li key={label} className="inline-flex items-center gap-3.5">
+            {i > 0 && <span aria-hidden className="h-0.5 w-12 rounded-sm bg-accent" />}
+            <a href={`#wiz-s${i + 1}`} className="inline-flex items-center gap-3.5 text-base text-accent">
+              <span aria-hidden className="grid h-[30px] w-[30px] place-items-center rounded-pill border-2 border-accent text-sm font-medium">
+                {i + 1}
+              </span>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ol>
 
       {Object.keys(errors).length > 0 && (
         <div id="wiz-errors" tabIndex={-1} role="alert" className="mb-4 rounded-md border border-danger bg-danger-soft px-4 py-3 text-sm text-danger">
@@ -172,17 +192,17 @@ export function Wizard({ existing }: { existing?: Automation }) {
         </div>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
-          <Card className="p-5">
+          <Card className="p-6 sm:px-8 sm:py-7">
             <Field label={t("wiz.name")} htmlFor="wiz-name" error={errors.name}>
               <Input id="wiz-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("wiz.name.ph")} invalid={!!errors.name} maxLength={80} />
             </Field>
           </Card>
 
-          <Card className="space-y-4 p-5">
-            <h2 className="font-semibold">1. {t("wiz.s1")}</h2>
-            <fieldset className="space-y-2">
+          <Card className="space-y-5 p-6 sm:px-8 sm:py-7">
+            <h2 id="wiz-s1" className="scroll-mt-6 text-xl font-medium text-accent">1. {t("wiz.s1")}</h2>
+            <fieldset className="flex flex-wrap gap-2.5">
               <legend className="sr-only">{t("wiz.s1")}</legend>
               {(
                 [
@@ -191,8 +211,8 @@ export function Wizard({ existing }: { existing?: Automation }) {
                   ["next", t("wiz.post.next")],
                 ] as [PostScope, string][]
               ).map(([v, label]) => (
-                <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input type="radio" name="scope" checked={scope === v} onChange={() => setScope(v)} className="h-4 w-4 accent-[var(--color-accent)]" />
+                <label key={v} className={cx("inline-flex h-11 cursor-pointer items-center rounded-pill border-[1.5px] border-accent px-5 text-[15px] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent", scope === v ? "bg-accent font-medium text-on-accent" : "text-accent hover:bg-accent-soft")}>
+                  <input type="radio" name="scope" checked={scope === v} onChange={() => setScope(v)} className="sr-only" />
                   {label}
                 </label>
               ))}
@@ -210,7 +230,7 @@ export function Wizard({ existing }: { existing?: Automation }) {
                         role="radio"
                         aria-checked={postId === p.id}
                         onClick={() => setPostId(p.id)}
-                        className={cx("w-full overflow-hidden rounded-md border-2 text-left", postId === p.id ? "border-accent" : "border-border")}
+                        className={cx("w-full overflow-hidden rounded-[20px] border-[2.5px] bg-bg text-left", postId === p.id ? "border-accent" : "border-transparent")}
                       >
                         {p.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -218,7 +238,7 @@ export function Wizard({ existing }: { existing?: Automation }) {
                         ) : (
                           <span aria-hidden className="block aspect-square" style={{ background: `linear-gradient(135deg, hsl(${p.hue} 60% 35%), hsl(${(p.hue + 50) % 360} 70% 55%))` }} />
                         )}
-                        <span className="block truncate px-2 py-1.5 text-xs">{p.caption}</span>
+                        <span className="block truncate px-3 pb-3 pt-2.5 text-sm font-medium text-accent">{p.caption}</span>
                       </button>
                     </li>
                   ))}
@@ -254,27 +274,25 @@ export function Wizard({ existing }: { existing?: Automation }) {
             )}
           </Card>
 
-          <Card className="space-y-4 p-5">
-            <h2 className="font-semibold">2. {t("wiz.s2")}</h2>
-            <fieldset className="space-y-2">
+          <Card className="space-y-5 p-6 sm:px-8 sm:py-7">
+            <h2 id="wiz-s2" className="scroll-mt-6 text-xl font-medium text-accent">2. {t("wiz.s2")}</h2>
+            <fieldset className="flex flex-wrap gap-2.5">
               <legend className="sr-only">{t("wiz.s2")}</legend>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <input type="radio" name="kw" checked={!anyWord} onChange={() => setAnyWord(false)} className="h-4 w-4 accent-[var(--color-accent)]" />
-                {t("wiz.kw.some")}
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <input type="radio" name="kw" checked={anyWord} onChange={() => setAnyWord(true)} className="h-4 w-4 accent-[var(--color-accent)]" />
-                {t("wiz.kw.any")}
-              </label>
+              {([[false, t("wiz.kw.some")], [true, t("wiz.kw.any")]] as [boolean, string][]).map(([v, label]) => (
+                <label key={String(v)} className={cx("inline-flex h-11 cursor-pointer items-center rounded-pill border-[1.5px] border-accent px-5 text-[15px] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent", anyWord === v ? "bg-accent font-medium text-on-accent" : "text-accent hover:bg-accent-soft")}>
+                  <input type="radio" name="kw" checked={anyWord === v} onChange={() => setAnyWord(v)} className="sr-only" />
+                  {label}
+                </label>
+              ))}
             </fieldset>
             {!anyWord && (
               <div className="space-y-2">
                 <Input aria-label={t("wiz.kw.some")} value={kw} onChange={(e) => setKw(e.target.value)} placeholder={t("wiz.kw.ph")} invalid={!!errors.kw} />
                 <div className="flex flex-wrap gap-1.5" aria-live="polite">
                   {words.map((w) => (
-                    <Badge key={w} tone="info">
+                    <span key={w} className="inline-flex items-center rounded-pill bg-mint px-3.5 py-1.5 text-[15px] font-medium text-accent">
                       {w}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
                 <p className="text-xs text-text-muted">{t("wiz.kw.hint")}</p>
@@ -284,9 +302,9 @@ export function Wizard({ existing }: { existing?: Automation }) {
             {pub && <Textarea aria-label={t("wiz.reply.public")} rows={3} value={pubText} onChange={(e) => setPubText(e.target.value)} placeholder={t("wiz.reply.public.ph")} />}
           </Card>
 
-          <Card className="space-y-4 p-5">
+          <Card className="space-y-5 p-6 sm:px-8 sm:py-7">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-semibold">3. {t("wiz.s3")}</h2>
+              <h2 id="wiz-s3" className="scroll-mt-6 text-xl font-medium text-accent">3. {t("wiz.s3")}</h2>
               <Tabs label={t("wiz.lang")} value={dmLang} onChange={setDmLang} items={langItems} />
             </div>
             {dmLang !== defaultLang && !curText.trim() && <p className="text-xs text-warning">{t("wiz.lang.missing")}</p>}
@@ -371,6 +389,7 @@ export function Wizard({ existing }: { existing?: Automation }) {
           <WizardTest graph={buildGraph(buildInput())} defaultLang={defaultLang} />
         </aside>
       </div>
+      </div>
     </div>
   );
 }
@@ -409,10 +428,11 @@ function Phone({
           ]}
         />
       </div>
-      <div className="mx-auto h-[420px] w-[250px] overflow-hidden rounded-[28px] border-[6px] border-text bg-accent p-3 text-xs text-on-accent" aria-label={t("wiz.preview")} role="img">
+      <div className="mx-auto w-full max-w-[360px] rounded-[44px] bg-accent p-3.5" aria-label={t("wiz.preview")} role="img">
+        <div className="min-h-[520px] rounded-[32px] bg-bg px-4 py-5 text-[13px] text-text">
         {tab === "post" && (
-          <div className="flex h-full flex-col gap-3">
-            <div aria-hidden className="aspect-square rounded-md bg-gradient-to-br from-accent-soft to-signature" />
+          <div className="flex flex-col gap-3">
+            <div aria-hidden className="aspect-square rounded-[20px] bg-gradient-to-br from-accent-soft to-signature" />
             <div className="flex gap-3" aria-hidden>
               <Heart className="h-4 w-4" />
             </div>
@@ -421,14 +441,14 @@ function Phone({
         )}
         {tab === "comments" && (
           <div className="space-y-3">
-            <div className="font-semibold">{t("wiz.preview.comments")}</div>
+            <div className="text-sm font-medium text-accent">{t("wiz.preview.comments")}</div>
             <p>
-              <span className="font-semibold">visitor </span>
+              <span className="font-medium text-accent">visitor </span>
               {comment}
             </p>
             {publicReply && (
-              <p className="ml-4 rounded-md bg-white/10 p-2">
-                <span className="font-semibold">tr_marketing </span>
+              <p className="ml-4 rounded-[18px] bg-canvas p-3">
+                <span className="font-medium text-accent">tr_marketing </span>
                 {publicReply}
               </p>
             )}
@@ -436,16 +456,17 @@ function Phone({
         )}
         {tab === "dm" && (
           <div className="space-y-2">
-            <div className="max-w-[90%] rounded-lg bg-white/15 p-2.5 text-[11px] leading-snug">{dm || "…"}</div>
-            {btn && <div className="max-w-[90%] rounded-md bg-white/10 px-2.5 py-1.5 text-center font-semibold">{btn}</div>}
+            <div className="max-w-[90%] rounded-[22px_22px_22px_6px] bg-canvas px-4 py-3 text-[14px] leading-snug">{dm || "…"}</div>
+            {btn && <div className="max-w-[90%] rounded-pill border-[1.5px] border-accent px-3 py-2 text-center text-[14px] font-medium text-accent">{btn}</div>}
             {pdf && (
-              <div className="mt-4 flex max-w-[90%] items-center gap-2 rounded-lg bg-white/15 p-2.5">
-                <FileText className="h-4 w-4 shrink-0" aria-hidden />
-                <span className="truncate">{pdf}</span>
+              <div className="mt-4 flex max-w-[90%] items-center gap-3 rounded-[22px] border-[1.5px] border-accent bg-bg px-4 py-3">
+                <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                <span className="truncate font-medium text-accent">{pdf}</span>
               </div>
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

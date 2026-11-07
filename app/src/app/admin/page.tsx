@@ -74,7 +74,7 @@ export default function AdminPage() {
         {data && (
           <>
             <section aria-labelledby="adm-ws">
-              <h2 id="adm-ws" className="mb-3 text-lg font-semibold">{t("adm.ws")}</h2>
+              <h2 id="adm-ws" className="mb-3 text-xl font-medium text-accent">{t("adm.ws")}</h2>
               <Card className="divide-y divide-border">
                 {data.workspaces.map((w) => (
                   <div key={w.id} className="space-y-2 px-4 py-3">
@@ -125,7 +125,7 @@ export default function AdminPage() {
             </section>
 
             <section aria-labelledby="adm-add">
-              <h2 id="adm-add" className="mb-3 text-lg font-semibold">{t("adm.add")}</h2>
+              <h2 id="adm-add" className="mb-3 text-xl font-medium text-accent">{t("adm.add")}</h2>
               <Card className="p-4">
                 <form
                   className="grid gap-3 sm:grid-cols-2"
@@ -148,7 +148,7 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label htmlFor="adm-org" className="mb-1 block text-xs font-medium text-text-muted">{t("adm.ws.pick")}</label>
-                    <select id="adm-org" value={org} onChange={(e) => setOrg(e.target.value)} className="h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm">
+                    <select id="adm-org" value={org} onChange={(e) => setOrg(e.target.value)} className="h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm">
                       <option value="">{t("adm.none")}</option>
                       {data.workspaces.map((w) => (
                         <option key={w.id} value={w.id}>{w.name}</option>
@@ -157,7 +157,7 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label htmlFor="adm-role" className="mb-1 block text-xs font-medium text-text-muted">{t("adm.role")}</label>
-                    <select id="adm-role" value={role} disabled={!org} onChange={(e) => setRole(e.target.value as Role)} className="h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm disabled:opacity-50">
+                    <select id="adm-role" value={role} disabled={!org} onChange={(e) => setRole(e.target.value as Role)} className="h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm disabled:opacity-50">
                       {ROLES.map((r) => (
                         <option key={r} value={r}>{t(`role.${r}` as Key)}</option>
                       ))}
@@ -171,7 +171,7 @@ export default function AdminPage() {
             </section>
 
             <section aria-labelledby="adm-users">
-              <h2 id="adm-users" className="mb-3 text-lg font-semibold">{t("adm.users")}</h2>
+              <h2 id="adm-users" className="mb-3 text-xl font-medium text-accent">{t("adm.users")}</h2>
               <div className="space-y-3">
                 {data.people.map((p) => (
                   <Card key={p.email} className="space-y-3 p-4">
@@ -210,7 +210,7 @@ export default function AdminPage() {
                               value={cur}
                               disabled={busy || !p.user_id}
                               onChange={(e) => p.user_id && void act({ action: "set_membership", user_id: p.user_id, org_id: w.id, role: e.target.value === "" ? null : (e.target.value as Role) })}
-                              className="h-9 rounded-md border border-border-input bg-bg px-2 text-sm disabled:opacity-50"
+                              className="h-9 rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm disabled:opacity-50"
                             >
                               <option value="">{t("adm.none")}</option>
                               {ROLES.map((r) => (

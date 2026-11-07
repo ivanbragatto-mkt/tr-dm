@@ -66,7 +66,7 @@ export function AccountPicker({ accounts, portfolios, value, onChange, label }: 
         aria-label={label}
         onClick={() => (setActive(Math.max(0, flat.findIndex((a) => a.id === cur.id))), setOpen(!open))}
         onKeyDown={onKey}
-        className="flex h-11 w-full items-center gap-2 rounded-md border border-border-input bg-bg px-2 text-left text-sm"
+        className="flex h-11 w-full items-center gap-2 rounded-pill border-[1.5px] border-accent bg-bg px-2 text-left text-sm"
       >
         <Avatar account={cur} />
         <span className="min-w-0 flex-1 truncate">@{cur.username}</span>

@@ -27,12 +27,12 @@ export default function SettingsPage() {
           </Suspense>
         ) : (
           <section aria-labelledby="channels">
-          <h2 id="channels" className="mb-3 text-lg font-semibold">
+          <h2 id="channels" className="mb-3 text-xl font-medium text-accent">
             {t("settings.channels")}
           </h2>
           <Card className="divide-y divide-border">
             {(["settings.channel.ig", "settings.channel.msgr"] as Key[]).map((k, i) => (
-              <div key={k} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+              <div key={k} className="flex flex-wrap items-center justify-between gap-2 px-6 py-4">
                 <span className="font-medium">{t(k)}</span>
                 <span className="flex items-center gap-2 text-sm text-text-muted">
                   {i === 0 ? <Badge tone="success">{t("settings.channel.status")}</Badge> : <Badge>{t("settings.channel.todo")}</Badge>}
@@ -44,7 +44,7 @@ export default function SettingsPage() {
         )}
 
         <section aria-labelledby="team">
-          <h2 id="team" className="mb-3 text-lg font-semibold">
+          <h2 id="team" className="mb-3 text-xl font-medium text-accent">
             {t("settings.team")}
           </h2>
           <Card className="mb-4 overflow-x-auto">
@@ -52,9 +52,9 @@ export default function SettingsPage() {
               <tbody>
                 {team.map((m) => (
                   <tr key={m.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 font-medium">{m.name}</td>
-                    <td className="px-4 py-3 text-text-muted">{m.email}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4 font-medium">{m.name}</td>
+                    <td className="px-6 py-4 text-text-muted">{m.email}</td>
+                    <td className="px-6 py-4">
                       <Badge tone="info">{t(`settings.role.${m.role}` as Key)}</Badge>
                     </td>
                   </tr>
@@ -114,7 +114,7 @@ function AccountSection() {
   }
   return (
     <section aria-labelledby="account">
-      <h2 id="account" className="mb-3 text-lg font-semibold">
+      <h2 id="account" className="mb-3 text-xl font-medium text-accent">
         {t("auth.account")}
       </h2>
       <Card className="max-w-xl space-y-3 p-4">
@@ -169,7 +169,7 @@ function ChannelsSection() {
   );
   return (
     <section aria-labelledby="channels">
-      <h2 id="channels" className="mb-3 text-lg font-semibold">
+      <h2 id="channels" className="mb-3 text-xl font-medium text-accent">
         {t("settings.channels")}
       </h2>
       {q.get("connected") && (
@@ -189,7 +189,7 @@ function ChannelsSection() {
           const list = accounts.filter((a) => a.portfolioId === p.id);
           return (
             <Card key={p.id} className="divide-y divide-border">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-4">
                 <h3 className="font-semibold">{p.name}</h3>
                 {mayConnect && (
                   <a href={`${base}&connection=${p.id}`}>

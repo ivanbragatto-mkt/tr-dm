@@ -56,7 +56,7 @@ export default function LoginPage() {
         </form>
         <label className="block text-xs text-text-muted">
           {t("lang.label")}
-          <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} className="mt-1 h-9 w-full rounded-md border border-border-input bg-bg px-2 text-sm text-text">
+          <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} className="mt-1 h-9 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm text-text">
             {LANGS.map((l) => (
               <option key={l.code} value={l.code} lang={l.code}>
                 {l.label}

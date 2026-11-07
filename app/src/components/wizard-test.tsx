@@ -70,7 +70,7 @@ export function WizardTest({ graph, defaultLang }: { graph: Graph; defaultLang: 
         <Input id="wt-comment" value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("wiz.try.comment.ph")} />
       </Field>
       <Field label={t("wiz.lang")} htmlFor="wt-lang">
-        <select id="wt-lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="h-10 w-full rounded-md border border-border-input bg-bg px-2 text-sm">
+        <select id="wt-lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="h-12 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm">
           {LANGS.map((l) => (
             <option key={l.code} value={l.code}>
               {l.label}

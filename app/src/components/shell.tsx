@@ -93,7 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <label htmlFor="ws-sel" className="mb-1 block text-xs font-medium text-text-muted">
                 {t("switch.ws")}
               </label>
-              <select id="ws-sel" value={activeOrg ?? ""} onChange={(e) => selectOrg(e.target.value)} className="h-9 w-full rounded-md border border-border-input bg-bg px-2 text-sm">
+              <select id="ws-sel" value={activeOrg ?? ""} onChange={(e) => selectOrg(e.target.value)} className="h-9 w-full rounded-pill border-[1.5px] border-accent bg-bg px-2 text-sm">
                 {workspaces.map((w) => (
                   <option key={w.id} value={w.id}>
                     {w.name}
@@ -201,10 +201,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({ title, actions }: { title: string; actions?: ReactNode }) {
+/** Page title block from the design: the selected account in orange above a big Medium title, actions on the right. */
+export function PageHeader({ title, actions, eyebrow }: { title: string; actions?: ReactNode; eyebrow?: string | null }) {
+  const { accounts, activeAccount } = useStore();
+  const acc = accounts.find((a) => a.id === activeAccount);
+  const top = eyebrow === undefined ? (acc ? `@${acc.username.replace(/^@/, "")}` : null) : eyebrow;
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-4 pb-4 pt-6 sm:px-8">
-      <h1 className="text-display font-medium text-accent">{title}</h1>
+    <div className="flex flex-wrap items-end justify-between gap-4 px-4 pb-6 pt-6 sm:px-8">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        {top && <span className="text-sm font-medium text-signature">{top}</span>}
+        <h1 className="text-[34px] font-medium leading-[1.1] text-accent sm:text-display sm:leading-[1.1]">{title}</h1>
+      </div>
       {actions}
     </div>
   );
