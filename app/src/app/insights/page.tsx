@@ -1,20 +1,25 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { remoteEnabled } from "@/lib/supabase/client";
 import { Badge, Card } from "@/components/ui";
 import { PageHeader } from "@/components/shell";
+import { AccountPicker } from "@/components/account-picker";
 import { Charts, useInsights, type InsightsData } from "@/components/insights";
 
 const RANGES = [7, 30, 90];
 
 export default function InsightsPage() {
   const { t, lang } = useI18n();
-  const { activeAccount, accounts } = useStore();
+  const { activeAccount, activeOrg, accounts, portfolios } = useStore();
   const [days, setDays] = useState(30);
-  const acc = accounts.find((a) => a.id === activeAccount);
-  const { data, err, loading } = useInsights({ account: remoteEnabled ? activeAccount : null }, days);
+  const mine = accounts.filter((a) => a.orgId === activeOrg && a.status === "connected");
+  // the account picked on this page; starts as the one selected in the side menu
+  const [sel, setSel] = useState<string | null>(activeAccount);
+  useEffect(() => setSel(activeAccount), [activeAccount]);
+  const acc = mine.find((a) => a.id === sel) ?? mine[0];
+  const { data, err, loading } = useInsights({ account: remoteEnabled ? (acc?.id ?? null) : null }, days);
   const one: InsightsData | null = data && data.accounts[0] ? { ...data, total: data.accounts[0].series, insightsKnown: data.accounts[0].insightsKnown } : null;
   const tone = { live: "success", paused: "warning", draft: "muted" } as const;
   const range = (
@@ -30,6 +35,12 @@ export default function InsightsPage() {
     <div className="mx-auto max-w-content pb-12">
       <PageHeader title={acc ? `${t("ins.title")} · @${acc.username.replace(/^@/, "")}` : t("ins.title")} actions={range} />
       <div className="space-y-6 px-4 sm:px-8">
+        {mine.length > 0 && (
+          <div className="max-w-xs">
+            <div className="mb-1 text-xs font-medium text-text-muted">{t("ins.account")}</div>
+            <AccountPicker accounts={mine} portfolios={portfolios} value={acc?.id ?? null} onChange={setSel} label={t("ins.account")} />
+          </div>
+        )}
         {!acc && <Card className="p-4 text-sm text-text-muted">{t("ins.noacct")}</Card>}
         {loading && <p className="text-sm text-text-muted">{t("ins.loading")}</p>}
         {err && <p role="alert" className="text-sm text-danger">{t("ins.err")}</p>}
