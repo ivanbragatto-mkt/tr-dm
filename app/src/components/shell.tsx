@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-current={active ? "page" : undefined}
             className={cx(
               "flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors duration-fast",
-              active ? "bg-bg text-accent" : "text-on-accent hover:bg-accent-soft hover:text-accent",
+              active ? "bg-accent text-on-accent" : "text-accent hover:bg-accent-soft",
             )}
           >
             <Icon className="h-5 w-5" aria-hidden />
@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           href="/admin"
           onClick={() => setOpen(false)}
           aria-current={path.startsWith("/admin") ? "page" : undefined}
-          className={cx("flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors duration-fast", path.startsWith("/admin") ? "bg-bg text-accent" : "text-on-accent hover:bg-accent-soft hover:text-accent")}
+          className={cx("flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors duration-fast", path.startsWith("/admin") ? "bg-accent text-on-accent" : "text-accent hover:bg-accent-soft")}
         >
           <Shield className="h-5 w-5" aria-hidden />
           <span className="flex-1">{t("nav.admin")}</span>
@@ -80,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const side = (
     <>
       <div className="px-3 pb-2 pt-4">
-        <div className="flex items-center justify-center rounded-lg bg-white px-3 py-2.5">
+        <div className="flex items-center justify-center px-3 py-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/tr-echo-light.svg" alt={t("app.name")} className="h-9 w-auto" />
         </div>
@@ -102,9 +102,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           )}
           <div>
-            <div className="mb-1 text-xs font-medium text-on-accent">{t("switch.acct")}</div>
+            <div className="mb-1 text-xs font-medium text-accent">{t("switch.acct")}</div>
             {accounts.length === 0 ? (
-              <p className="text-xs text-on-accent">{t("switch.none")}</p>
+              <p className="text-xs text-accent">{t("switch.none")}</p>
             ) : (
               <AccountPicker accounts={accounts} portfolios={portfolios} value={activeAccount} onChange={selectAccount} label={t("switch.acct")} />
             )}
@@ -115,15 +115,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="p-3">
         {remoteEnabled && email && (
           <form action="/auth/signout" method="post" className="mb-3 flex items-center gap-2">
-            <span className="min-w-0 flex-1 truncate text-xs text-on-accent" title={email}>
+            <span className="min-w-0 flex-1 truncate text-xs text-accent" title={email}>
               {email}
             </span>
-            <button type="submit" aria-label={t("auth.signout")} title={t("auth.signout")} className="grid h-8 w-8 shrink-0 place-items-center rounded-pill hover:bg-bg hover:text-accent">
+            <button type="submit" aria-label={t("auth.signout")} title={t("auth.signout")} className="grid h-8 w-8 shrink-0 place-items-center rounded-pill hover:bg-accent-soft">
               <LogOut className="h-4 w-4" aria-hidden />
             </button>
           </form>
         )}
-        <label htmlFor="ui-lang" className="mb-1 block text-xs font-medium text-on-accent">
+        <label htmlFor="ui-lang" className="mb-1 block text-xs font-medium text-accent">
           {t("lang.label")}
         </label>
         <select
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-bg focus:px-3 focus:py-2">
         {t("nav.skip")}
       </a>
-      <aside className="sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-sidebar shrink-0 flex-col overflow-y-auto rounded-xl bg-accent text-on-accent lg:flex">{side}</aside>
+      <aside className="sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-sidebar shrink-0 flex-col overflow-y-auto rounded-xl bg-surface-raised text-accent lg:flex">{side}</aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-header items-center gap-3 border-b border-border bg-bg px-4 lg:hidden">
@@ -188,7 +188,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-72 flex-col overflow-y-auto bg-accent text-on-accent shadow-pop">
+          <div className="absolute inset-y-0 left-0 flex w-72 flex-col overflow-y-auto bg-surface-raised text-accent shadow-pop">
             <button onClick={() => setOpen(false)} aria-label={t("common.close")} className="absolute right-2 top-3 grid h-8 w-8 place-items-center rounded-md hover:bg-surface">
               <X className="h-4 w-4" aria-hidden />
             </button>
