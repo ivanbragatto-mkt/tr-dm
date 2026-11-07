@@ -4,11 +4,14 @@ import { Check, FileText, MessageCircle, Megaphone } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { Card, cx } from "@/components/ui";
+import { Charts, useInsights } from "@/components/insights";
+import { remoteEnabled } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/shell";
 
 export default function HomePage() {
   const { t } = useI18n();
-  const { automations, conversations } = useStore();
+  const { automations, conversations, activeOrg, accounts } = useStore();
+  const { data: ins, err: insErr, loading: insLoading } = useInsights({ org: remoteEnabled ? activeOrg : null }, 30);
   const hasLive = automations.some((a) => a.status === "live");
   const answered = conversations.some((c) => c.messages.some((m) => m.sender === "agent" && m.kind === "text"));
   const steps = [
@@ -25,7 +28,51 @@ export default function HomePage() {
   return (
     <div className="mx-auto max-w-content pb-12">
       <PageHeader title={t("home.title")} />
-      <p className="px-4 text-sm text-text-muted sm:px-8">{t("home.channels", { n: 1 })} · Instagram</p>
+      <p className="px-4 text-sm text-text-muted sm:px-8">{t("home.channels", { n: accounts.filter((a) => a.status === "connected").length || 1 })} · Instagram</p>
+
+      {remoteEnabled && activeOrg && (
+        <section aria-labelledby="ov" className="px-4 pt-8 sm:px-8">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 id="ov" className="text-lg font-semibold">
+                {t("ins.ws")}
+              </h2>
+              <p className="text-sm text-text-muted">{t("ins.ws.sub")}</p>
+            </div>
+            <Link href="/insights" className="text-sm font-medium text-accent underline underline-offset-4">
+              {t("ins.detail")}
+            </Link>
+          </div>
+          {insLoading && <p className="text-sm text-text-muted">{t("ins.loading")}</p>}
+          {insErr && <p role="alert" className="text-sm text-danger">{t("ins.err")}</p>}
+          {ins && ins.total && <Charts data={ins} days={30} />}
+          {ins && !ins.total && <Card className="p-4 text-sm text-text-muted">{t("ins.noacct")}</Card>}
+          {ins && ins.accounts.length > 1 && (
+            <Card className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[420px] text-left text-sm">
+                <thead className="border-b border-border text-xs text-text-muted">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 font-medium">{t("ins.account")}</th>
+                    <th scope="col" className="px-4 py-3 font-medium">{t("ins.followers")}</th>
+                    <th scope="col" className="px-4 py-3 font-medium">{t("ins.triggers")}</th>
+                    <th scope="col" className="px-4 py-3 font-medium">{t("ins.out")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ins.accounts.map((a) => (
+                    <tr key={a.id} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 font-medium">@{a.username}</td>
+                      <td className="px-4 py-3">{[...a.series.followers].reverse().find((v) => v != null) ?? "–"}</td>
+                      <td className="px-4 py-3">{a.series.triggers.reduce((x: number, v) => x + (v ?? 0), 0)}</td>
+                      <td className="px-4 py-3">{a.series.messages_out.reduce((x: number, v) => x + (v ?? 0), 0)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          )}
+        </section>
+      )}
 
       <section aria-labelledby="start" className="px-4 pt-8 sm:px-8">
         <h2 id="start" className="mb-3 text-lg font-semibold">

@@ -412,6 +412,15 @@ export function setAutomationStatus(id: string, status: Status) {
   emit();
   if (remoteEnabled) void remote.setStatus(id, status);
 }
+/** Deletes a paused automation. Resolves true when it is really gone (the server confirmed, or there is no server). */
+export async function deleteAutomation(id: string): Promise<boolean> {
+  const a = state.automations.find((x) => x.id === id);
+  if (!a || a.status !== "paused") return false;
+  if (remoteEnabled && !(await remote.deleteAutomation(id))) return false;
+  state = { ...state, automations: state.automations.filter((x) => x.id !== id) };
+  emit();
+  return true;
+}
 export function renameAutomation(id: string, name: string) {
   patchAutomation(id, (a) => ({ ...a, name, modified: now() }));
   emit();

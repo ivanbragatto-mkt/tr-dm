@@ -210,6 +210,11 @@ export async function publish(id: string): Promise<boolean> {
 export async function rename(id: string, name: string) {
   await track(() => supabase().from("automations").update({ name }).eq("id", id));
 }
+/** Only a paused automation can be deleted. The status filter is checked by the database too, not just the screen. */
+export async function deleteAutomation(id: string): Promise<boolean> {
+  const { data, error } = await supabase().from("automations").delete().eq("id", id).eq("status", "paused").select("id");
+  return !error && (data?.length ?? 0) === 1;
+}
 export async function setStatus(id: string, status: "draft" | "live" | "paused") {
   await track(() => supabase().from("automations").update({ status }).eq("id", id));
 }

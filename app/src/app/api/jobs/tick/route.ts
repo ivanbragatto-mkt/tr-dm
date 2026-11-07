@@ -4,6 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 import { processPending, resumeDueRuns } from "@/lib/engine/process";
 import { sendQueued } from "@/lib/engine/sender";
 import { markExpired } from "@/lib/channels";
+import { snapshotAll } from "@/lib/stats";
 
 export const maxDuration = 60;
 
@@ -26,5 +27,6 @@ export async function GET(req: NextRequest) {
   const resumed = await resumeDueRuns(db, 50);
   const sent = await sendQueued(db, { limit: 50 });
   const tokens = await markExpired(db);
-  return NextResponse.json({ events, resumed, sent, tokens });
+  const stats = await snapshotAll(db).catch(() => ({ done: 0, notes: {} }));
+  return NextResponse.json({ events, resumed, sent, tokens, stats: stats.done });
 }

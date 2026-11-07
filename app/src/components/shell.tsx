@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { Home, Users, Workflow, Inbox, Settings, Menu, X, LogOut, Shield } from "lucide-react";
+import { Home, Users, Workflow, Inbox, Settings, BarChart3, Menu, X, LogOut, Shield } from "lucide-react";
 import { LANGS, useI18n, type Key } from "@/lib/i18n";
 import { dismissNotice, selectAccount, selectOrg, useHydrated, useNotice, useStore } from "@/lib/store";
 import { useSyncFailed } from "@/lib/remote";
@@ -17,6 +17,7 @@ const NAV: { href: string; key: Key; icon: typeof Home }[] = [
   { href: "/contacts", key: "nav.contacts", icon: Users },
   { href: "/automations", key: "nav.automations", icon: Workflow },
   { href: "/inbox", key: "nav.inbox", icon: Inbox },
+  { href: "/insights", key: "nav.insights", icon: BarChart3 },
   { href: "/settings", key: "nav.settings", icon: Settings },
 ];
 
