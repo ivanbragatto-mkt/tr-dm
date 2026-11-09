@@ -5,8 +5,7 @@ import { Plus, Search } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { copyAutomationTo, deleteAutomation, useStore } from "@/lib/store";
 import { remoteEnabled } from "@/lib/supabase/client";
-import { flowPath } from "@/lib/flow-path";
-import { Badge, Button, Card, EmptyState, FlowPath, Modal, cx, timeAgo } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Modal, cx, timeAgo } from "@/components/ui";
 import { PageHeader } from "@/components/shell";
 
 export default function AutomationsPage() {
@@ -80,9 +79,8 @@ export default function AutomationsPage() {
                 <input type="text" placeholder={t("auto.search")} value={q} onChange={(e) => setQ(e.target.value)} className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-text-muted" />
               </label>
             </div>
-            <div role="presentation" className="hidden items-end gap-x-5 px-6 text-[13px] lg:grid lg:grid-cols-[minmax(220px,1.4fr)_minmax(120px,1fr)_70px_130px_90px_170px]">
+            <div role="presentation" className="hidden items-end gap-x-5 px-6 text-[13px] lg:grid lg:grid-cols-[minmax(220px,1fr)_80px_150px_100px_170px]">
               <span>{t("auto.col.name")}</span>
-              <span />
               <span>{t("auto.col.replies")}</span>
               <span>{t("auto.col.clicks")}</span>
               <span>{t("auto.col.modified")}</span>
@@ -93,15 +91,12 @@ export default function AutomationsPage() {
                 const ctr = a.stats.sent ? Math.round((a.stats.clicked / a.stats.sent) * 100) : 0;
                 return (
                   <li key={a.id}>
-                    <article className="grid items-center gap-x-5 gap-y-2 rounded-lg bg-surface-raised px-6 py-3 lg:grid-cols-[minmax(220px,1.4fr)_minmax(120px,1fr)_70px_130px_90px_170px]">
+                    <article className="grid items-center gap-x-5 gap-y-2 rounded-lg bg-surface-raised px-6 py-3 lg:grid-cols-[minmax(220px,1fr)_80px_150px_100px_170px]">
                       <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                         <Link href={`/automations/${a.id}`} className="truncate text-base font-medium text-accent hover:text-signature" title={a.name}>
                           {a.name}
                         </Link>
                         <Badge tone={tone[a.status]}>{t(`auto.status.${a.status}` as "auto.status.live")}</Badge>
-                      </div>
-                      <div className="min-w-0 overflow-hidden whitespace-nowrap">
-                        <FlowPath small dots steps={flowPath(a).map((k) => t(k))} />
                       </div>
                       <div className="text-xl font-light text-accent" title={t("auto.col.replies")}>
                         <span className="text-[13px] font-normal text-text lg:hidden">{t("auto.col.replies")} </span>
