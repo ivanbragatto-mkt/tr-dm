@@ -268,7 +268,7 @@ function Body({ a }: { a: Automation }) {
 
   const trigData = graph.nodes.find((n) => n.data.kind === "trigger")?.data;
   const keyword = trigData && trigData.kind === "trigger" ? (trigData.anyWord ? "info" : trigData.keywords[0] ?? "info") : "info";
-  const tone = { live: "success", paused: "warning", draft: "muted" } as const;
+  const tone = { live: "success", paused: "danger", draft: "muted" } as const;
 
   return (
     <div className="flex h-[calc(100vh-var(--layout-header))] flex-col lg:h-screen">

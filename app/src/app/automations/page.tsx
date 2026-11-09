@@ -35,7 +35,7 @@ export default function AutomationsPage() {
   const mine = automations;
   const count = (k: typeof tab) => (k === "all" ? mine.length : mine.filter((x) => x.status === k).length);
   const list = mine.filter((a) => (tab === "all" || a.status === tab) && a.name.toLowerCase().includes(q.toLowerCase()));
-  const tone = { live: "success", paused: "warning", draft: "muted" } as const;
+  const tone = { live: "success", paused: "danger", draft: "muted" } as const;
   const newBtn = (
     <Link href="/automations/new">
       <Button>
@@ -80,39 +80,44 @@ export default function AutomationsPage() {
                 <input type="text" placeholder={t("auto.search")} value={q} onChange={(e) => setQ(e.target.value)} className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-text-muted" />
               </label>
             </div>
-            <ul className="space-y-3">
+            <div role="presentation" className="hidden items-end gap-x-5 px-6 text-[13px] lg:grid lg:grid-cols-[minmax(220px,1.4fr)_minmax(120px,1fr)_70px_130px_90px_170px]">
+              <span>{t("auto.col.name")}</span>
+              <span />
+              <span>{t("auto.col.replies")}</span>
+              <span>{t("auto.col.clicks")}</span>
+              <span>{t("auto.col.modified")}</span>
+              <span />
+            </div>
+            <ul className="space-y-2">
               {list.map((a) => {
                 const ctr = a.stats.sent ? Math.round((a.stats.clicked / a.stats.sent) * 100) : 0;
                 return (
                   <li key={a.id}>
-                    <article className="flex flex-wrap items-center gap-x-8 gap-y-4 rounded-lg bg-surface-raised px-7 py-[22px]">
-                      <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-3">
-                        <div className="flex flex-wrap items-center gap-3.5">
-                          <Link href={`/automations/${a.id}`} className="break-words text-xl font-medium text-accent hover:text-signature">
-                            {a.name}
-                          </Link>
-                          <Badge tone={tone[a.status]}>{t(`auto.status.${a.status}` as "auto.status.live")}</Badge>
-                        </div>
-                        <FlowPath small steps={flowPath(a).map((k) => t(k))} />
+                    <article className="grid items-center gap-x-5 gap-y-2 rounded-lg bg-surface-raised px-6 py-3 lg:grid-cols-[minmax(220px,1.4fr)_minmax(120px,1fr)_70px_130px_90px_170px]">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                        <Link href={`/automations/${a.id}`} className="truncate text-base font-medium text-accent hover:text-signature" title={a.name}>
+                          {a.name}
+                        </Link>
+                        <Badge tone={tone[a.status]}>{t(`auto.status.${a.status}` as "auto.status.live")}</Badge>
                       </div>
-                      <div className="flex flex-[0_0_110px] flex-col gap-0.5">
-                        <span className="text-[13px]">{t("auto.col.replies")}</span>
-                        <span className="text-[32px] font-light leading-[1.1] text-accent">{a.stats.runs}</span>
+                      <div className="min-w-0 overflow-hidden whitespace-nowrap">
+                        <FlowPath small dots steps={flowPath(a).map((k) => t(k))} />
                       </div>
-                      <div className="flex flex-[0_0_150px] flex-col gap-2">
-                        <span className="text-[13px]">{t("auto.col.clicks")}</span>
-                        <span className="flex items-center gap-2.5">
-                          <span className="text-[32px] font-light leading-[1.1] text-accent">{a.stats.sent ? `${ctr}%` : "–"}</span>
-                          <span aria-hidden className="h-2 flex-1 overflow-hidden rounded-pill bg-mint">
-                            <span className="block h-2 rounded-pill bg-accent" style={{ width: `${ctr}%` }} />
-                          </span>
+                      <div className="text-xl font-light text-accent" title={t("auto.col.replies")}>
+                        <span className="text-[13px] font-normal text-text lg:hidden">{t("auto.col.replies")} </span>
+                        {a.stats.runs}
+                      </div>
+                      <div className="flex items-center gap-2" title={t("auto.col.clicks")}>
+                        <span className="w-12 text-xl font-light text-accent">{a.stats.sent ? `${ctr}%` : "–"}</span>
+                        <span aria-hidden className="h-1.5 flex-1 overflow-hidden rounded-pill bg-mint">
+                          <span className="block h-1.5 rounded-pill bg-accent" style={{ width: `${ctr}%` }} />
                         </span>
                       </div>
-                      <div className="flex-[0_0_110px] text-sm leading-[1.4]">{timeAgo(a.modified, t, lang)}</div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[13px] leading-tight">{timeAgo(a.modified, t, lang)}</div>
+                      <div className="flex items-center justify-end gap-2">
                         {remoteEnabled &&
                           (copying === a.id ? (
-                            <select aria-label={t("auto.copy.to")} autoFocus defaultValue="" onChange={(e) => void copy(a.id, e.target.value)} onBlur={() => setCopying(null)} className="h-10 rounded-pill border-[1.5px] border-accent bg-bg px-4 text-sm">
+                            <select aria-label={t("auto.copy.to")} autoFocus defaultValue="" onChange={(e) => void copy(a.id, e.target.value)} onBlur={() => setCopying(null)} className="h-9 rounded-pill border-[1.5px] border-accent bg-bg px-3 text-sm">
                               <option value="" disabled>
                                 {t("auto.copy.to")}…
                               </option>
@@ -123,11 +128,11 @@ export default function AutomationsPage() {
                               ))}
                             </select>
                           ) : (
-                            <Button variant="secondary" size="sm" disabled={others.length === 0} title={others.length === 0 ? t("auto.copy.none") : undefined} onClick={() => setCopying(a.id)}>
-                              {t("auto.copy")}
+                            <Button variant="secondary" size="sm" className="h-9 whitespace-nowrap px-4" disabled={others.length === 0} title={others.length === 0 ? t("auto.copy.none") : t("auto.copy")} onClick={() => setCopying(a.id)}>
+                              {t("auto.copy.short")}
                             </Button>
                           ))}
-                        <Button variant="secondary" size="sm" disabled={a.status !== "paused"} title={a.status !== "paused" ? t("auto.delete.only") : undefined} onClick={() => setDel({ id: a.id, name: a.name })}>
+                        <Button variant="secondary" size="sm" className="h-9 px-4" disabled={a.status !== "paused"} title={a.status !== "paused" ? t("auto.delete.only") : undefined} onClick={() => setDel({ id: a.id, name: a.name })}>
                           {t("auto.delete")}
                         </Button>
                       </div>

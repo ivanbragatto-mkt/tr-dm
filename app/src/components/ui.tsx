@@ -36,18 +36,18 @@ export function Button({ variant = "primary", size = "md", loading, className, c
   );
 }
 
-/** Status pill from the design: a dot and a label. success = mint (running), muted = outlined with an empty dot (draft), warning = outlined with a filled dot (paused). */
+/** Status pill: a dot and a label. success = green (live), danger = red (paused), muted = grey (draft), warning = amber. */
 export function Badge({ tone = "muted", children }: { tone?: "muted" | "success" | "warning" | "info" | "danger"; children: ReactNode }) {
   const t = {
-    success: ["bg-mint text-accent border-transparent", "bg-accent"],
-    muted: ["bg-surface-raised text-accent border-accent", "bg-surface-raised border-[1.5px] border-accent"],
-    warning: ["bg-surface-raised text-accent border-accent", "bg-accent"],
-    info: ["bg-info-soft text-info border-transparent", "bg-info"],
-    danger: ["bg-danger-soft text-danger border-transparent", "bg-danger"],
+    success: ["bg-success-soft text-success", "bg-success"],
+    muted: ["bg-canvas text-text-muted", "bg-text-muted"],
+    warning: ["bg-warning-soft text-warning", "bg-warning"],
+    info: ["bg-info-soft text-info", "bg-info"],
+    danger: ["bg-danger-soft text-danger", "bg-danger"],
   }[tone];
   return (
-    <span className={cx("inline-flex items-center gap-2 rounded-pill border-[1.5px] px-3.5 py-1 text-sm font-medium", t[0])}>
-      <span aria-hidden className={cx("box-border h-2 w-2 shrink-0 rounded-pill", t[1])} />
+    <span className={cx("inline-flex items-center gap-2 whitespace-nowrap rounded-pill px-3 py-1 text-sm font-medium", t[0])}>
+      <span aria-hidden className={cx("h-2 w-2 shrink-0 rounded-pill", t[1])} />
       {children}
     </span>
   );
@@ -207,9 +207,21 @@ export function timeAgo(t: number, tr: (k: "common.now" | "common.minutes", v?: 
 }
 
 /** The automation's path: dots joined by a line, as in the design. */
-export function FlowPath({ steps, small }: { steps: string[]; small?: boolean }) {
+export function FlowPath({ steps, small, nowrap, dots }: { steps: string[]; small?: boolean; nowrap?: boolean; dots?: boolean }) {
+  if (dots)
+    return (
+      <ol aria-label={steps.join(" → ")} title={steps.join(" → ")} className="flex items-center">
+        {steps.map((s, i) => (
+          <li key={i} className="inline-flex items-center">
+            {i > 0 && <span aria-hidden className="h-0.5 w-3.5 bg-accent" />}
+            <span aria-hidden className="box-border h-2.5 w-2.5 rounded-pill border-[2.5px] border-accent bg-surface-raised" />
+            <span className="sr-only">{s}</span>
+          </li>
+        ))}
+      </ol>
+    );
   return (
-    <ol className={cx("flex flex-wrap items-center gap-x-2.5 gap-y-1.5", small ? "text-sm" : "text-[15px]")}>
+    <ol className={cx("flex items-center gap-x-2.5 gap-y-1.5", nowrap ? "flex-nowrap" : "flex-wrap", small ? "text-sm" : "text-[15px]")}>
       {steps.map((s, i) => (
         <li key={i} className="inline-flex items-center gap-2.5">
           {i > 0 && <span aria-hidden className={cx("h-0.5 rounded-sm bg-accent", small ? "w-5" : "w-7")} />}

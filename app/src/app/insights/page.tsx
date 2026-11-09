@@ -21,7 +21,7 @@ export default function InsightsPage() {
   const acc = mine.find((a) => a.id === sel) ?? mine[0];
   const { data, err, loading } = useInsights({ account: remoteEnabled ? (acc?.id ?? null) : null }, days);
   const one: InsightsData | null = data && data.accounts[0] ? { ...data, total: data.accounts[0].series, insightsKnown: data.accounts[0].insightsKnown } : null;
-  const tone = { live: "success", paused: "warning", draft: "muted" } as const;
+  const tone = { live: "success", paused: "danger", draft: "muted" } as const;
   const range = (
     <div role="group" aria-label={t("ins.range")} className="inline-flex rounded-pill bg-surface-raised p-1.5">
       {RANGES.map((n) => (
